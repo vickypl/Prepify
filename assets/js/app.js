@@ -181,7 +181,7 @@ function generateStudyPlan() {
   const weak = topics.filter(t => scoreTopic(t) === 'Weak');
   const medium = topics.filter(t => scoreTopic(t) === 'Medium');
   const strong = topics.filter(t => scoreTopic(t) === 'Strong');
-  const hrs = app.data.config.dailyTargetHours;
+  const hrs = Math.max(1, Number(app.data.config.dailyTargetHours) || 1);
 
   const slots = [
     ...pickTopics(weak, Math.ceil(hrs * 0.6)),
@@ -298,7 +298,7 @@ function bindEvents() {
 
   document.getElementById('saveConfig').onclick = () => {
     app.data.config.examDate = document.getElementById('examDate').value || app.data.config.examDate;
-    app.data.config.dailyTargetHours = Number(document.getElementById('dailyTargetHours').value || app.data.config.dailyTargetHours);
+    app.data.config.dailyTargetHours = Math.max(1, Number(document.getElementById('dailyTargetHours').value || app.data.config.dailyTargetHours || 1));
     saveData();
     renderAll();
   };
@@ -426,6 +426,9 @@ function showSection(id) {
   document.getElementById(id).classList.remove('d-none');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-section="${id}"]`).classList.add('active');
+  if (id === 'planner') generateStudyPlan();
+  if (id === 'analytics') renderAnalytics();
+  if (id === 'mocks') renderMocks();
 }
 
 function card(title, value) {
