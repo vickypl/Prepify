@@ -7,6 +7,7 @@ A web-based interactive study system for working professionals preparing for RBI
 - Subject management for Quant, Reasoning, English, GA, ESI, FM with editable topic metrics.
 - Topic tracking: status, confidence, accuracy, time spent, last studied, next revision, mistakes, notes.
 - Mock test tracker with score/accuracy/subject charts.
+- Built-in 10 timed mock tests (MCQ format with options, countdown timer, auto-submit on timeout, and score capture).
 - Weak area detection with top weak topics and subject heatmap.
 - Smart planner using 60/30/10 weak-medium-strong allocation.
 - Spaced revision logic (1, 3, 7, 15, 30 day intervals).
@@ -63,3 +64,4 @@ The app ships with pre-filled RBI syllabus sample topics and dummy user/mock dat
 ## Notes
 - Data persistence uses browser `localStorage`.
 - Clear browser storage to reset to default sample data.
+- Mock test question styles are adapted from common IndiaBIX aptitude topic formats (percentages, ratio, averages, SI/CI, probability, etc.).
