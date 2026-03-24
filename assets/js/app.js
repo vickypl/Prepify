@@ -120,7 +120,8 @@ const app = {
   pomodoroInterval: null,
   pomodoroSeconds: 1500,
   activeMockTest: null,
-  mockTestInterval: null
+  mockTestInterval: null,
+  confirmingDeleteAll: false
 };
 
 function q(text, options, answerIndex) {
@@ -169,6 +170,19 @@ function normalizeTopicFields(topicData) {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(app.data));
+}
+
+function resetAllData() {
+  app.data = normalizeData(structuredClone(defaultData));
+  app.activeSession = null;
+  app.activeMockTest = null;
+  clearInterval(app.sessionInterval);
+  clearInterval(app.pomodoroInterval);
+  clearInterval(app.mockTestInterval);
+  app.pomodoroSeconds = 1500;
+  localStorage.removeItem(STORAGE_KEY);
+  saveData();
+  renderAll();
 }
 
 function allTopics() {
@@ -623,6 +637,17 @@ function bindEvents() {
   document.getElementById('resetChecklist').onclick = () => {
     app.data.checklist.forEach(c => c.done = false);
     saveData(); renderDashboard();
+  };
+
+  document.getElementById('deleteEverything').onclick = () => {
+    app.confirmingDeleteAll = !app.confirmingDeleteAll;
+    document.getElementById('deleteEverythingConfirmWrap').classList.toggle('d-none', !app.confirmingDeleteAll);
+  };
+
+  document.getElementById('confirmDeleteEverything').onclick = () => {
+    resetAllData();
+    app.confirmingDeleteAll = false;
+    document.getElementById('deleteEverythingConfirmWrap').classList.add('d-none');
   };
 
   document.addEventListener('change', (e) => {
