@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prepify - RBI Grade A Smart Prep</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row min-vh-100">
+    <aside class="col-12 col-lg-2 sidebar p-3 border-end">
+      <h4 class="mb-3">Prepify</h4>
+      <div class="d-grid gap-2 mb-3" id="navButtons">
+        <button class="btn btn-outline-light nav-btn active" data-section="dashboard">Dashboard</button>
+        <button class="btn btn-outline-light nav-btn" data-section="subjects">Subjects</button>
+        <button class="btn btn-outline-light nav-btn" data-section="planner">Planner</button>
+        <button class="btn btn-outline-light nav-btn" data-section="mocks">Mocks</button>
+        <button class="btn btn-outline-light nav-btn" data-section="analytics">Analytics</button>
+      </div>
+      <div class="form-check form-switch mt-4">
+        <input class="form-check-input" type="checkbox" id="themeToggle" checked>
+        <label class="form-check-label" for="themeToggle">Dark mode</label>
+      </div>
+      <hr>
+      <h6>Pomodoro</h6>
+      <div id="pomodoro" class="small">
+        <div class="display-6" id="pomodoroTimer">25:00</div>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-success" id="pomodoroStart">Start</button>
+          <button class="btn btn-warning" id="pomodoroBreak">Break</button>
+          <button class="btn btn-danger" id="pomodoroReset">Reset</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="col-12 col-lg-10 p-3 p-lg-4">
+      <section id="dashboard" class="app-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2>User Dashboard</h2>
+          <div class="d-flex gap-2">
+            <input type="date" class="form-control" id="examDate">
+            <input type="number" class="form-control" id="dailyTargetHours" min="1" max="12" placeholder="Daily target (hrs)">
+            <button class="btn btn-primary" id="saveConfig">Save</button>
+          </div>
+        </div>
+        <div class="row g-3" id="dashboardCards"></div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-6">
+            <div class="card h-100"><div class="card-body">
+              <h5>Upcoming Tasks Today</h5><ul id="todayTasks" class="list-group list-group-flush"></ul>
+            </div></div>
+          </div>
+          <div class="col-md-6">
+            <div class="card h-100"><div class="card-body">
+              <h5>Daily Checklist</h5>
+              <div id="dailyChecklist" class="mb-2"></div>
+              <button class="btn btn-sm btn-outline-info" id="resetChecklist">Reset Checklist</button>
+            </div></div>
+          </div>
+        </div>
+        <div class="card mt-3"><div class="card-body">
+          <h5>Daily Study Flow</h5>
+          <div class="row g-2">
+            <div class="col-md-3"><select class="form-select" id="sessionTopic"></select></div>
+            <div class="col-md-2"><button class="btn btn-success w-100" id="startSession">Start Session</button></div>
+            <div class="col-md-2"><button class="btn btn-danger w-100" id="endSession">End Session</button></div>
+            <div class="col-md-2"><input class="form-control" type="number" id="sessionMistakes" placeholder="Mistakes"></div>
+            <div class="col-md-3"><div class="p-2 border rounded" id="sessionTimer">00:00:00</div></div>
+          </div>
+          <div class="mt-2 small" id="sessionSummary">No active session.</div>
+        </div></div>
+      </section>
+
+      <section id="subjects" class="app-section d-none">
+        <h2>Subjects & Topic Tracking</h2>
+        <div class="row g-3">
+          <div class="col-lg-4">
+            <div class="card"><div class="card-body">
+              <h5>Update Topic</h5>
+              <select class="form-select mb-2" id="topicSelect"></select>
+              <select class="form-select mb-2" id="statusInput">
+                <option>Not Started</option><option>In Progress</option><option>Completed</option>
+              </select>
+              <input class="form-control mb-2" id="confidenceInput" type="number" min="1" max="5" placeholder="Confidence (1-5)">
+              <input class="form-control mb-2" id="accuracyInput" type="number" min="0" max="100" placeholder="Accuracy %">
+              <input class="form-control mb-2" id="timeInput" type="number" min="0" placeholder="Time spent minutes">
+              <input class="form-control mb-2" id="mistakeInput" type="number" min="0" placeholder="Mistakes">
+              <textarea class="form-control mb-2" id="notesInput" rows="3" placeholder="Notes"></textarea>
+              <button class="btn btn-primary w-100" id="updateTopic">Save Topic Update</button>
+            </div></div>
+          </div>
+          <div class="col-lg-8">
+            <div class="card"><div class="card-body">
+              <h5>Topic Matrix</h5>
+              <div class="table-responsive"><table class="table table-sm" id="topicsTable"></table></div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="planner" class="app-section d-none">
+        <h2>Smart Study Planner</h2>
+        <div class="card mb-3"><div class="card-body">
+          <button class="btn btn-primary" id="generatePlan">Generate Plan</button>
+          <span class="ms-2" id="planMeta"></span>
+        </div></div>
+        <div class="row g-3">
+          <div class="col-md-6"><div class="card"><div class="card-body"><h5>Daily Hour-wise Plan</h5><ul id="dailyPlan" class="list-group"></ul></div></div></div>
+          <div class="col-md-6"><div class="card"><div class="card-body"><h5>Weekly Rotation Plan</h5><ul id="weeklyPlan" class="list-group"></ul></div></div></div>
+        </div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-6"><div class="card"><div class="card-body"><h5>Due for Revision Today</h5><ul id="dueRevision" class="list-group"></ul></div></div></div>
+          <div class="col-md-6"><div class="card"><div class="card-body"><h5>Overdue Topics</h5><ul id="overdueRevision" class="list-group"></ul></div></div></div>
+        </div>
+      </section>
+
+      <section id="mocks" class="app-section d-none">
+        <h2>Mock Test Tracker</h2>
+        <div class="card mb-3"><div class="card-body">
+          <div class="row g-2">
+            <div class="col-md-2"><input class="form-control" id="mockScore" type="number" placeholder="Score"></div>
+            <div class="col-md-2"><input class="form-control" id="mockAccuracy" type="number" placeholder="Accuracy %"></div>
+            <div class="col-md-2"><input class="form-control" id="mockTime" type="number" placeholder="Minutes"></div>
+            <div class="col-md-3"><input class="form-control" id="mockSections" placeholder='Section perf JSON'></div>
+            <div class="col-md-2"><input class="form-control" id="mockDate" type="date"></div>
+            <div class="col-md-1"><button class="btn btn-primary w-100" id="addMock">Add</button></div>
+          </div>
+        </div></div>
+        <div class="row g-3">
+          <div class="col-md-4"><canvas id="scoreTrend"></canvas></div>
+          <div class="col-md-4"><canvas id="accuracyTrend"></canvas></div>
+          <div class="col-md-4"><canvas id="subjectPerformance"></canvas></div>
+        </div>
+      </section>
+
+      <section id="analytics" class="app-section d-none">
+        <h2>Analytics + AI Recommendations</h2>
+        <div class="row g-3 mb-2" id="analyticsCards"></div>
+        <div class="row g-3">
+          <div class="col-md-6"><canvas id="completionChart"></canvas></div>
+          <div class="col-md-6"><canvas id="timeChart"></canvas></div>
+        </div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-6"><div class="card"><div class="card-body"><h5>Top 10 Weak Topics</h5><ul id="weakTopics" class="list-group"></ul></div></div></div>
+          <div class="col-md-6"><div class="card"><div class="card-body"><h5>Weakness Heatmap (Subject-wise)</h5><div id="heatmap"></div></div></div></div>
+        </div>
+        <div class="card mt-3"><div class="card-body">
+          <h5>AI Recommendation Engine</h5>
+          <ul id="aiRecommendations" class="list-group"></ul>
+        </div></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
