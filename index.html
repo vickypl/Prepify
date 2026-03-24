@@ -119,6 +119,21 @@
       <section id="mocks" class="app-section d-none">
         <h2>Mock Test Tracker</h2>
         <div class="card mb-3"><div class="card-body">
+          <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+            <select class="form-select mock-test-select" id="mockTestSelect"></select>
+            <div class="mock-timer" id="mockTestTimer">00:00</div>
+            <button class="btn btn-success" id="startMockTest">Start Test</button>
+            <button class="btn btn-outline-light" id="nextMockQuestion" disabled>Next</button>
+            <button class="btn btn-primary" id="submitMockTest" disabled>Submit</button>
+          </div>
+          <div id="mockTestMeta" class="small text-secondary mb-2">Choose a mock test and click Start Test.</div>
+          <div id="mockQuestionCard" class="d-none">
+            <div class="fw-semibold mb-2" id="mockQuestionText"></div>
+            <div id="mockQuestionOptions" class="d-grid gap-2"></div>
+          </div>
+          <div id="mockTestResult" class="alert alert-info d-none mt-3 mb-0"></div>
+        </div></div>
+        <div class="card mb-3"><div class="card-body">
           <div class="row g-2">
             <div class="col-md-2"><input class="form-control" id="mockScore" type="number" placeholder="Score"></div>
             <div class="col-md-2"><input class="form-control" id="mockAccuracy" type="number" placeholder="Accuracy %"></div>

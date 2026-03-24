@@ -1,5 +1,67 @@
 const STORAGE_KEY = 'prepify_rbi_v1';
 const todayISO = () => new Date().toISOString().slice(0,10);
+const MOCK_TEST_LIBRARY = [
+  mockTest('Mock Test 1: Percentages', 12, [
+    q('A batsman scored 110 runs including 3 boundaries and 8 sixes. What percent came from running between wickets?', ['45%', '46%', '50%', '55%'], 1),
+    q('A fruit seller sold 40% apples and still had 420 left. How many apples originally?', ['588', '600', '672', '700'], 3),
+    q('One student scored 9 more marks than another and that score was 56% of total marks. Find both marks.', ['39 and 30', '41 and 32', '42 and 33', '43 and 34'], 2),
+    q('Out of numbers from 1 to 70, what percent have unit digit 1 or 9?', ['14%', '20%', '21%', '40%'], 1)
+  ]),
+  mockTest('Mock Test 2: Ratio & Proportion', 12, [
+    q('The ratio of two numbers is 3:4 and their sum is 84. What is the larger number?', ['36', '42', '48', '54'], 2),
+    q('If A:B = 5:7 and B:C = 3:2, find A:B:C.', ['15:21:14', '10:21:14', '15:14:21', '5:7:2'], 0),
+    q('Income ratio of A and B is 4:3 and expense ratio is 3:2. If each saves ₹2000, A income is:', ['₹8000', '₹12000', '₹14000', '₹16000'], 1),
+    q('If x:y = 2:3 and y:z = 4:5, then x:z = ?', ['8:15', '2:5', '3:5', '5:8'], 0)
+  ]),
+  mockTest('Mock Test 3: Time & Work', 15, [
+    q('A can do work in 12 days and B in 18 days. In how many days can both finish together?', ['6.2', '7.2', '7.5', '8'], 1),
+    q('A alone can do a job in 8 days. After 3 days, B joins and together they finish remaining work in 2 days. B alone can do in:', ['10 days', '12 days', '16 days', '20 days'], 3),
+    q('A, B, C can do a work in 6, 9, 18 days respectively. In how many days if they work together?', ['3 days', '4 days', '4.5 days', '5 days'], 0),
+    q('If 12 workers finish a project in 15 days, how many workers are needed to finish in 9 days (same efficiency)?', ['18', '20', '22', '24'], 1)
+  ]),
+  mockTest('Mock Test 4: Profit & Loss', 12, [
+    q('An article is sold for ₹540 at 20% profit. Cost price is:', ['₹430', '₹440', '₹450', '₹460'], 2),
+    q('A shopkeeper gives 10% discount and still gains 8%. Marked price is what percent of cost price?', ['110%', '118%', '120%', '130%'], 2),
+    q('A trader sells two items at ₹1000 each. On one he gains 20%, on other he loses 20%. Net result is:', ['No profit no loss', '2% gain', '4% loss', '8% loss'], 2),
+    q('If selling price is 75% of marked price and marked price is 20% above cost price, then loss/profit is:', ['10% profit', '10% loss', '5% loss', 'No profit no loss'], 1)
+  ]),
+  mockTest('Mock Test 5: Averages', 10, [
+    q('Average of five numbers is 27. If one number is removed, average becomes 25. Removed number is:', ['30', '33', '35', '37'], 2),
+    q('The average age of 20 students is 18 years. A teacher aged 38 joins; new average is:', ['18.5', '18.8', '19', '19.5'], 2),
+    q('Average runs in 9 innings is 42. In 10th inning player scores 78. New average is:', ['44.4', '45.6', '46.2', '47.1'], 1),
+    q('Average of first 10 even numbers is:', ['9', '10', '11', '12'], 2)
+  ]),
+  mockTest('Mock Test 6: Simple & Compound Interest', 12, [
+    q('Simple interest on ₹8000 at 7.5% p.a. for 2 years is:', ['₹1000', '₹1100', '₹1200', '₹1300'], 2),
+    q('A sum becomes ₹9680 in 2 years at 10% p.a. simple interest. Principal is:', ['₹8000', '₹8200', '₹8400', '₹8800'], 0),
+    q('Difference between CI and SI on ₹5000 for 2 years at 10% is:', ['₹40', '₹50', '₹60', '₹70'], 1),
+    q('At what rate will ₹2000 amount to ₹2420 in 2 years at simple interest?', ['9%', '10%', '10.5%', '11%'], 2)
+  ]),
+  mockTest('Mock Test 7: Problems on Ages', 10, [
+    q('Father is 3 times son’s age. After 10 years, father will be twice son’s age. Son’s present age is:', ['10', '12', '14', '16'], 0),
+    q('Average age of A and B is 30. B is 4 years older than A. Age of A is:', ['26', '27', '28', '29'], 2),
+    q('5 years ago, mother was 4 times daughter. After 5 years, mother will be 2.5 times daughter. Daughter now is:', ['10', '12', '15', '16'], 0),
+    q('Present ages of P and Q are in ratio 5:7. After 8 years ratio becomes 7:9. Present age of Q is:', ['21', '28', '35', '42'], 1)
+  ]),
+  mockTest('Mock Test 8: Numbers & HCF/LCM', 12, [
+    q('Least number divisible by 12, 15 and 20 is:', ['40', '60', '120', '180'], 2),
+    q('HCF of 96 and 404 is:', ['2', '4', '6', '8'], 1),
+    q('A number when divided by 7 leaves 4. What remainder when same number divided by 21?', ['4', '7', '11', '18'], 2),
+    q('Difference between squares of two consecutive integers is 31. Smaller integer is:', ['14', '15', '16', '17'], 1)
+  ]),
+  mockTest('Mock Test 9: Probability', 12, [
+    q('Tickets numbered 1 to 20 are mixed and one drawn. Probability number is multiple of 3 or 5?', ['1/2', '2/5', '8/15', '9/20'], 3),
+    q('A bag has 2 red, 3 green, 2 blue balls. Two balls drawn. Probability none is blue?', ['10/21', '11/21', '2/7', '5/7'], 0),
+    q('A die is thrown once. Probability of getting prime number is:', ['1/3', '1/2', '2/3', '5/6'], 1),
+    q('Two coins are tossed. Probability of getting at least one head is:', ['1/4', '1/2', '3/4', '1'], 2)
+  ]),
+  mockTest('Mock Test 10: Mixed Aptitude', 15, [
+    q('A train 120 m long crosses a pole in 6 seconds. Speed is:', ['54 km/h', '60 km/h', '66 km/h', '72 km/h'], 3),
+    q('If 20% of a number is 36, number is:', ['120', '144', '160', '180'], 3),
+    q('Average of 7 numbers is 35. If one number is excluded, average of remaining is 32. Excluded number is:', ['49', '50', '53', '56'], 2),
+    q('A can complete a task in 10 days and B in 15 days. If they work on alternate days starting with A, task completes in:', ['12 days', '12.5 days', '13 days', '13.5 days'], 2)
+  ])
+];
 
 const defaultData = {
   config: { examDate: '2026-09-15', dailyTargetHours: 3 },
@@ -51,8 +113,18 @@ const app = {
   activeSession: null,
   sessionInterval: null,
   pomodoroInterval: null,
-  pomodoroSeconds: 1500
+  pomodoroSeconds: 1500,
+  activeMockTest: null,
+  mockTestInterval: null
 };
+
+function q(text, options, answerIndex) {
+  return { text, options, answerIndex };
+}
+
+function mockTest(title, durationMin, questions) {
+  return { title, durationMin, questions };
+}
 
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -218,6 +290,123 @@ function renderMocks() {
   drawChart('scoreTrend', 'line', labels, [{ label: 'Score', data: scores }]);
   drawChart('accuracyTrend', 'line', labels, [{ label: 'Accuracy %', data: accuracies }]);
   drawChart('subjectPerformance', 'bar', Object.keys(subAvg), [{ label: 'Avg Subject Score', data: Object.values(subAvg) }]);
+  renderMockTestLibrary();
+}
+
+function renderMockTestLibrary() {
+  const select = document.getElementById('mockTestSelect');
+  if (!select) return;
+  const existingIndex = Number(select.value || 0);
+  select.innerHTML = MOCK_TEST_LIBRARY.map((test, idx) =>
+    `<option value="${idx}">${test.title} (${test.questions.length} Q | ${test.durationMin} min)</option>`
+  ).join('');
+  select.value = String(Math.min(existingIndex, MOCK_TEST_LIBRARY.length - 1));
+  if (!app.activeMockTest) {
+    document.getElementById('mockTestMeta').textContent = 'Choose a mock test and click Start Test.';
+    document.getElementById('mockTestTimer').textContent = '00:00';
+    document.getElementById('mockQuestionCard').classList.add('d-none');
+    document.getElementById('mockTestResult').classList.add('d-none');
+  }
+}
+
+function startSelectedMockTest() {
+  const idx = Number(document.getElementById('mockTestSelect').value || 0);
+  const test = MOCK_TEST_LIBRARY[idx];
+  clearInterval(app.mockTestInterval);
+  app.activeMockTest = {
+    testIndex: idx,
+    currentQuestionIndex: 0,
+    selectedAnswers: Array(test.questions.length).fill(null),
+    remainingSeconds: test.durationMin * 60
+  };
+  document.getElementById('submitMockTest').disabled = false;
+  document.getElementById('nextMockQuestion').disabled = false;
+  document.getElementById('mockTestResult').classList.add('d-none');
+  renderMockTestQuestion();
+  renderMockTimer();
+  app.mockTestInterval = setInterval(() => {
+    if (!app.activeMockTest) return;
+    app.activeMockTest.remainingSeconds -= 1;
+    renderMockTimer();
+    if (app.activeMockTest.remainingSeconds <= 0) submitActiveMockTest(true);
+  }, 1000);
+}
+
+function renderMockTestQuestion() {
+  if (!app.activeMockTest) return;
+  const test = MOCK_TEST_LIBRARY[app.activeMockTest.testIndex];
+  const question = test.questions[app.activeMockTest.currentQuestionIndex];
+  const total = test.questions.length;
+  const current = app.activeMockTest.currentQuestionIndex + 1;
+  document.getElementById('mockQuestionCard').classList.remove('d-none');
+  document.getElementById('mockQuestionText').textContent = `Q${current}/${total}. ${question.text}`;
+  document.getElementById('mockQuestionOptions').innerHTML = question.options.map((opt, idx) => `
+    <label class="mock-option">
+      <input type="radio" name="mockOption" value="${idx}" ${app.activeMockTest.selectedAnswers[app.activeMockTest.currentQuestionIndex] === idx ? 'checked' : ''}>
+      ${opt}
+    </label>
+  `).join('');
+  document.getElementById('mockTestMeta').textContent = `${test.title} | Question ${current} of ${total}`;
+  document.getElementById('nextMockQuestion').textContent = current === total ? 'Review' : 'Next';
+  document.querySelectorAll('input[name="mockOption"]').forEach(el => {
+    el.onchange = (e) => {
+      app.activeMockTest.selectedAnswers[app.activeMockTest.currentQuestionIndex] = Number(e.target.value);
+    };
+  });
+}
+
+function gotoNextMockQuestion() {
+  if (!app.activeMockTest) return;
+  const lastIndex = MOCK_TEST_LIBRARY[app.activeMockTest.testIndex].questions.length - 1;
+  app.activeMockTest.currentQuestionIndex = Math.min(lastIndex, app.activeMockTest.currentQuestionIndex + 1);
+  renderMockTestQuestion();
+}
+
+function submitActiveMockTest(autoSubmitted = false) {
+  if (!app.activeMockTest) return;
+  const test = MOCK_TEST_LIBRARY[app.activeMockTest.testIndex];
+  const correct = test.questions.reduce((sum, question, idx) =>
+    sum + (app.activeMockTest.selectedAnswers[idx] === question.answerIndex ? 1 : 0), 0);
+  const attempted = app.activeMockTest.selectedAnswers.filter(x => x !== null).length;
+  const accuracy = Math.round((correct / test.questions.length) * 100);
+  const unanswered = test.questions.length - attempted;
+  const timeUsedMin = Math.ceil((test.durationMin * 60 - app.activeMockTest.remainingSeconds) / 60);
+
+  app.data.mocks.push({
+    date: todayISO(),
+    score: Math.round((correct / test.questions.length) * 100),
+    accuracy,
+    time: Math.max(1, timeUsedMin),
+    sections: { Quant: accuracy, Reasoning: accuracy, English: accuracy, GA: accuracy, ESI: accuracy, FM: accuracy }
+  });
+  saveData();
+  clearInterval(app.mockTestInterval);
+
+  const result = document.getElementById('mockTestResult');
+  result.classList.remove('d-none');
+  result.innerHTML = `
+    <strong>${autoSubmitted ? 'Time up! ' : ''}Test submitted.</strong>
+    Score: ${correct}/${test.questions.length} (${accuracy}%). Attempted: ${attempted}. Unanswered: ${unanswered}.
+  `;
+  app.activeMockTest = null;
+  document.getElementById('mockQuestionCard').classList.add('d-none');
+  document.getElementById('submitMockTest').disabled = true;
+  document.getElementById('nextMockQuestion').disabled = true;
+  renderMockTimer();
+  renderMocks();
+  renderAnalytics();
+}
+
+function renderMockTimer() {
+  const timerEl = document.getElementById('mockTestTimer');
+  if (!app.activeMockTest) {
+    timerEl.textContent = '00:00';
+    return;
+  }
+  const sec = Math.max(0, app.activeMockTest.remainingSeconds);
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  timerEl.textContent = `${m}:${s}`;
 }
 
 function drawChart(id, type, labels, datasets) {
@@ -337,6 +526,9 @@ function bindEvents() {
     renderMocks();
     renderAnalytics();
   };
+  document.getElementById('startMockTest').onclick = startSelectedMockTest;
+  document.getElementById('nextMockQuestion').onclick = gotoNextMockQuestion;
+  document.getElementById('submitMockTest').onclick = () => submitActiveMockTest(false);
 
   document.getElementById('startSession').onclick = startSession;
   document.getElementById('endSession').onclick = endSession;

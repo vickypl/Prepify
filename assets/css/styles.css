@@ -58,6 +58,23 @@
 .heat-strong { background: rgba(25,135,84,.3); }
 .list-group-item { background: transparent; color: inherit; border-color: rgba(255,255,255,.1); }
 #sessionTimer { font-family: monospace; font-size: 1.1rem; text-align: center; border-radius: 12px; }
+.mock-test-select { max-width: 280px; }
+.mock-timer {
+  min-width: 92px;
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.2);
+  text-align: center;
+}
+.mock-option {
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.mock-option input { margin-right: 10px; }
 
 .app-section {
   animation: fadeSlide .25s ease;
