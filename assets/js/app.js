@@ -100,10 +100,15 @@ const defaultData = {
 };
 
 function topic(name, subtopics, difficulty, importance) {
+  const subtopicStatuses = String(subtopics).split(',').map(s => s.trim()).filter(Boolean).map(name => ({
+    name,
+    status: 'Not Done'
+  }));
   return {
     name, subtopics, difficulty, importance,
     status: 'Not Started', confidence: 2, accuracy: 45,
-    timeSpent: 0, lastStudied: '', nextRevision: '', mistakes: 0, notes: ''
+    timeSpent: 0, lastStudied: '', nextRevision: '', mistakes: 0, notes: '',
+    subtopicStatuses
   };
 }
 
@@ -128,7 +133,38 @@ function mockTest(title, durationMin, questions) {
 
 function loadData() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : structuredClone(defaultData);
+  if (!raw) return normalizeData(structuredClone(defaultData));
+  try {
+    return normalizeData(JSON.parse(raw));
+  } catch {
+    return normalizeData(structuredClone(defaultData));
+  }
+}
+
+function normalizeData(data) {
+  if (!data || !Array.isArray(data.subjects)) return structuredClone(defaultData);
+  data.subjects.forEach(subject => {
+    if (!Array.isArray(subject.topics)) subject.topics = [];
+    subject.topics = subject.topics.map(t => normalizeTopicFields(t));
+  });
+  return data;
+}
+
+function normalizeTopicFields(topicData) {
+  const subtopicNames = String(topicData.subtopics || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const statuses = Array.isArray(topicData.subtopicStatuses) ? topicData.subtopicStatuses : [];
+  const subtopicStatuses = subtopicNames.map((name, idx) => ({
+    name,
+    status: statuses[idx]?.status || 'Not Done'
+  }));
+  return {
+    ...topicData,
+    subtopics: subtopicNames.join(', '),
+    subtopicStatuses
+  };
 }
 
 function saveData() {
@@ -210,6 +246,53 @@ function renderSubjects() {
       <td>${t.confidence}</td><td>${t.accuracy}%</td><td>${t.timeSpent}m</td><td>${t.mistakes}</td><td>${t.nextRevision || '-'}</td>
     </tr>`).join('');
   document.getElementById('topicsTable').innerHTML = header + rows;
+  renderTopicChecklist();
+}
+
+function renderTopicChecklist() {
+  const wrapper = document.getElementById('topicChecklist');
+  if (!wrapper) return;
+  let total = 0;
+  let done = 0;
+  let inProgress = 0;
+  const blocks = app.data.subjects.map((subject, sIdx) => {
+    const topicRows = subject.topics.map((topic, tIdx) => {
+      const items = topic.subtopicStatuses.map((sub, subIdx) => {
+        total += 1;
+        if (sub.status === 'Done') done += 1;
+        if (sub.status === 'In Progress') inProgress += 1;
+        return `
+          <div class="subtopic-row">
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+              <div class="subtopic-title">${sub.name}</div>
+              <select class="form-select form-select-sm subtopic-status-select" data-subject="${sIdx}" data-topic="${tIdx}" data-subtopic="${subIdx}" style="max-width: 170px;">
+                <option ${sub.status === 'Not Done' ? 'selected' : ''}>Not Done</option>
+                <option ${sub.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option ${sub.status === 'Done' ? 'selected' : ''}>Done</option>
+              </select>
+            </div>
+          </div>
+        `;
+      }).join('');
+      return `
+        <div class="mb-3">
+          <h6 class="mb-2">${topic.name}</h6>
+          ${items || '<div class="small text-secondary">No subtopics listed.</div>'}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="mb-4">
+        <h5>${subject.name}</h5>
+        ${topicRows}
+      </div>
+    `;
+  }).join('');
+
+  wrapper.innerHTML = blocks || '<div class="text-secondary">No checklist data available.</div>';
+  const pending = Math.max(0, total - done - inProgress);
+  document.getElementById('topicChecklistSummary').textContent = `Done: ${done} | In Progress: ${inProgress} | Not Done: ${pending}`;
 }
 
 function updateTopicByIndex(idx, patch) {
@@ -546,6 +629,20 @@ function bindEvents() {
     if (e.target.classList.contains('checklist-item')) {
       app.data.checklist[Number(e.target.dataset.index)].done = e.target.checked;
       saveData(); renderDashboard();
+    }
+    if (e.target.classList.contains('subtopic-status-select')) {
+      const sIdx = Number(e.target.dataset.subject);
+      const tIdx = Number(e.target.dataset.topic);
+      const subIdx = Number(e.target.dataset.subtopic);
+      const topic = app.data.subjects[sIdx]?.topics[tIdx];
+      if (!topic || !topic.subtopicStatuses?.[subIdx]) return;
+      topic.subtopicStatuses[subIdx].status = e.target.value;
+      const statuses = topic.subtopicStatuses.map(s => s.status);
+      topic.status = statuses.every(s => s === 'Done') ? 'Completed' : statuses.some(s => s === 'In Progress' || s === 'Done') ? 'In Progress' : 'Not Started';
+      saveData();
+      renderSubjects();
+      renderDashboard();
+      renderAnalytics();
     }
   });
 }

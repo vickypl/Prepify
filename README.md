@@ -6,6 +6,7 @@ A web-based interactive study system for working professionals preparing for RBI
 - Dashboard with daily target vs actual, streak, completion %, focus score, and upcoming tasks.
 - Subject management for Quant, Reasoning, English, GA, ESI, FM with editable topic metrics.
 - Topic tracking: status, confidence, accuracy, time spent, last studied, next revision, mistakes, notes.
+- Topic and subtopic checklist tracker with Not Done / In Progress / Done states.
 - Mock test tracker with score/accuracy/subject charts.
 - Built-in 10 timed mock tests (MCQ format with options, countdown timer, auto-submit on timeout, and score capture).
 - Weak area detection with top weak topics and subject heatmap.
@@ -16,6 +17,7 @@ A web-based interactive study system for working professionals preparing for RBI
 - Daily study flow: session start/end with timer and mistake logging.
 - Bonus: Pomodoro timer, daily checklist, streak motivation, missed day recovery suggestion.
 - Dark mode, minimal Bootstrap UI, sidebar navigation.
+- Website icon (favicon) for better browser tab branding.
 
 ## Tech stack
 - HTML5
