@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'prepify_rbi_v1';
+const RUNTIME_KEY = 'prepify_runtime_v1';
 const todayISO = () => new Date().toISOString().slice(0,10);
 const MOCK_TEST_LIBRARY = [
   mockTest('Mock Test 1: Percentages', 12, [
@@ -172,9 +173,33 @@ function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(app.data));
 }
 
+function loadRuntimeState() {
+  const raw = localStorage.getItem(RUNTIME_KEY);
+  if (!raw) return { activeSession: null };
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      activeSession: parsed?.activeSession || null
+    };
+  } catch {
+    return { activeSession: null };
+  }
+}
+
+function saveRuntimeState() {
+  localStorage.setItem(RUNTIME_KEY, JSON.stringify({
+    activeSession: app.activeSession
+  }));
+}
+
+function clearRuntimeState() {
+  app.activeSession = null;
+  localStorage.removeItem(RUNTIME_KEY);
+}
+
 function resetAllData() {
   app.data = normalizeData(structuredClone(defaultData));
-  app.activeSession = null;
+  clearRuntimeState();
   app.activeMockTest = null;
   clearInterval(app.sessionInterval);
   clearInterval(app.pomodoroInterval);
@@ -677,10 +702,8 @@ function startSession() {
   const idx = Number(document.getElementById('sessionTopic').value);
   const t = allTopics()[idx];
   app.activeSession = { topic: t.name, subject: t.subject, start: Date.now(), idx };
-  app.sessionInterval = setInterval(() => {
-    const sec = Math.floor((Date.now() - app.activeSession.start)/1000);
-    document.getElementById('sessionTimer').textContent = toHms(sec);
-  }, 1000);
+  saveRuntimeState();
+  startSessionTicker();
   document.getElementById('sessionSummary').textContent = `Studying ${t.subject} - ${t.name}`;
 }
 
@@ -701,10 +724,35 @@ function endSession() {
     nextRevision: revisionStep(t)
   });
 
-  app.activeSession = null;
+  clearRuntimeState();
   document.getElementById('sessionTimer').textContent = '00:00:00';
   document.getElementById('sessionSummary').textContent = `Session complete. Duration ${durationMin}m, mistakes ${mistakes}.`;
   saveData(); renderAll();
+}
+
+function startSessionTicker() {
+  clearInterval(app.sessionInterval);
+  app.sessionInterval = setInterval(() => {
+    if (!app.activeSession) return;
+    const sec = Math.floor((Date.now() - app.activeSession.start)/1000);
+    document.getElementById('sessionTimer').textContent = toHms(Math.max(0, sec));
+  }, 1000);
+  const sec = Math.floor((Date.now() - app.activeSession.start)/1000);
+  document.getElementById('sessionTimer').textContent = toHms(Math.max(0, sec));
+}
+
+function restoreRuntimeSession() {
+  const runtime = loadRuntimeState();
+  const activeSession = runtime.activeSession;
+  if (!activeSession || !Number.isFinite(activeSession.idx)) return;
+  const topic = allTopics()[activeSession.idx];
+  if (!topic) {
+    clearRuntimeState();
+    return;
+  }
+  app.activeSession = activeSession;
+  document.getElementById('sessionSummary').textContent = `Studying ${topic.subject} - ${topic.name}`;
+  startSessionTicker();
 }
 
 function startPomodoro(seconds) {
@@ -762,3 +810,4 @@ function toHms(sec) {
 
 bindEvents();
 renderAll();
+restoreRuntimeSession();
