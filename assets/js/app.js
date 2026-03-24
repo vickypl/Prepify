@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'prepify_rbi_v1';
+const RUNTIME_KEY = 'prepify_runtime_v1';
 const todayISO = () => new Date().toISOString().slice(0,10);
 const MOCK_TEST_LIBRARY = [
   mockTest('Mock Test 1: Percentages', 12, [
@@ -120,7 +121,8 @@ const app = {
   pomodoroInterval: null,
   pomodoroSeconds: 1500,
   activeMockTest: null,
-  mockTestInterval: null
+  mockTestInterval: null,
+  confirmingDeleteAll: false
 };
 
 function q(text, options, answerIndex) {
@@ -169,6 +171,43 @@ function normalizeTopicFields(topicData) {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(app.data));
+}
+
+function loadRuntimeState() {
+  const raw = localStorage.getItem(RUNTIME_KEY);
+  if (!raw) return { activeSession: null };
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      activeSession: parsed?.activeSession || null
+    };
+  } catch {
+    return { activeSession: null };
+  }
+}
+
+function saveRuntimeState() {
+  localStorage.setItem(RUNTIME_KEY, JSON.stringify({
+    activeSession: app.activeSession
+  }));
+}
+
+function clearRuntimeState() {
+  app.activeSession = null;
+  localStorage.removeItem(RUNTIME_KEY);
+}
+
+function resetAllData() {
+  app.data = normalizeData(structuredClone(defaultData));
+  clearRuntimeState();
+  app.activeMockTest = null;
+  clearInterval(app.sessionInterval);
+  clearInterval(app.pomodoroInterval);
+  clearInterval(app.mockTestInterval);
+  app.pomodoroSeconds = 1500;
+  localStorage.removeItem(STORAGE_KEY);
+  saveData();
+  renderAll();
 }
 
 function allTopics() {
@@ -625,6 +664,17 @@ function bindEvents() {
     saveData(); renderDashboard();
   };
 
+  document.getElementById('deleteEverything').onclick = () => {
+    app.confirmingDeleteAll = !app.confirmingDeleteAll;
+    document.getElementById('deleteEverythingConfirmWrap').classList.toggle('d-none', !app.confirmingDeleteAll);
+  };
+
+  document.getElementById('confirmDeleteEverything').onclick = () => {
+    resetAllData();
+    app.confirmingDeleteAll = false;
+    document.getElementById('deleteEverythingConfirmWrap').classList.add('d-none');
+  };
+
   document.addEventListener('change', (e) => {
     if (e.target.classList.contains('checklist-item')) {
       app.data.checklist[Number(e.target.dataset.index)].done = e.target.checked;
@@ -652,10 +702,8 @@ function startSession() {
   const idx = Number(document.getElementById('sessionTopic').value);
   const t = allTopics()[idx];
   app.activeSession = { topic: t.name, subject: t.subject, start: Date.now(), idx };
-  app.sessionInterval = setInterval(() => {
-    const sec = Math.floor((Date.now() - app.activeSession.start)/1000);
-    document.getElementById('sessionTimer').textContent = toHms(sec);
-  }, 1000);
+  saveRuntimeState();
+  startSessionTicker();
   document.getElementById('sessionSummary').textContent = `Studying ${t.subject} - ${t.name}`;
 }
 
@@ -676,10 +724,35 @@ function endSession() {
     nextRevision: revisionStep(t)
   });
 
-  app.activeSession = null;
+  clearRuntimeState();
   document.getElementById('sessionTimer').textContent = '00:00:00';
   document.getElementById('sessionSummary').textContent = `Session complete. Duration ${durationMin}m, mistakes ${mistakes}.`;
   saveData(); renderAll();
+}
+
+function startSessionTicker() {
+  clearInterval(app.sessionInterval);
+  app.sessionInterval = setInterval(() => {
+    if (!app.activeSession) return;
+    const sec = Math.floor((Date.now() - app.activeSession.start)/1000);
+    document.getElementById('sessionTimer').textContent = toHms(Math.max(0, sec));
+  }, 1000);
+  const sec = Math.floor((Date.now() - app.activeSession.start)/1000);
+  document.getElementById('sessionTimer').textContent = toHms(Math.max(0, sec));
+}
+
+function restoreRuntimeSession() {
+  const runtime = loadRuntimeState();
+  const activeSession = runtime.activeSession;
+  if (!activeSession || !Number.isFinite(activeSession.idx)) return;
+  const topic = allTopics()[activeSession.idx];
+  if (!topic) {
+    clearRuntimeState();
+    return;
+  }
+  app.activeSession = activeSession;
+  document.getElementById('sessionSummary').textContent = `Studying ${topic.subject} - ${topic.name}`;
+  startSessionTicker();
 }
 
 function startPomodoro(seconds) {
@@ -737,3 +810,4 @@ function toHms(sec) {
 
 bindEvents();
 renderAll();
+restoreRuntimeSession();
